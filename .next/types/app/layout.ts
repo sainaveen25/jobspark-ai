@@ -1,4 +1,4 @@
-// File: D:\Progs\jobspark-ai-main\jobspark-ai-main\app\layout.tsx
+// File: /dev-server/app/layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
