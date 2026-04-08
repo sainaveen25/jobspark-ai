@@ -6,13 +6,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import Jobs from "./pages/Jobs";
-import Applications from "./pages/Applications";
-import Resume from "./pages/Resume";
-import SettingsPage from "./pages/Settings";
-import NotFound from "./pages/NotFound";
+import Auth from "./legacy-pages/Auth";
+import Dashboard from "./legacy-pages/Dashboard";
+import Jobs from "./legacy-pages/Jobs";
+import Applications from "./legacy-pages/Applications";
+import Resume from "./legacy-pages/Resume";
+import SettingsPage from "./legacy-pages/Settings";
+import NotFound from "./legacy-pages/NotFound";
 
 const queryClient = new QueryClient();
 
