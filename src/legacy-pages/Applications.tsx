@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Building2, MapPin, ExternalLink, Trash2 } from "lucide-react";
+import { Building2, MapPin, ExternalLink, Trash2, ClipboardList } from "lucide-react";
 import { motion } from "framer-motion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageHeader } from "@/components/PageHeader";
+import { SkeletonRow } from "@/components/SkeletonCard";
 
 interface ApplicationWithJob {
   id: string;
@@ -24,12 +25,14 @@ interface ApplicationWithJob {
   } | null;
 }
 
-const statusColors: Record<string, string> = {
-  saved: "bg-secondary text-secondary-foreground",
-  applied: "bg-primary/10 text-primary",
-  interview: "bg-success/10 text-success",
-  rejected: "bg-destructive/10 text-destructive",
+const statusConfig: Record<string, { label: string; dot: string; badge: string; header: string }> = {
+  saved: { label: "Saved", dot: "bg-muted-foreground", badge: "bg-secondary text-secondary-foreground", header: "border-muted-foreground/30" },
+  applied: { label: "Applied", dot: "bg-primary", badge: "bg-primary/10 text-primary", header: "border-primary/30" },
+  interview: { label: "Interview", dot: "bg-success", badge: "bg-success/10 text-success", header: "border-success/30" },
+  rejected: { label: "Rejected", dot: "bg-destructive", badge: "bg-destructive/10 text-destructive", header: "border-destructive/30" },
 };
+
+const statuses = ["saved", "applied", "interview", "rejected"] as const;
 
 export default function Applications() {
   const { user } = useAuth();
@@ -70,73 +73,121 @@ export default function Applications() {
     }
   };
 
-  const statuses = ["saved", "applied", "interview", "rejected"] as const;
+  const getByStatus = (status: string) => applications.filter((a) => a.status === status);
 
   if (loading) {
-    return <div className="space-y-4 max-w-4xl">{[1, 2, 3].map((i) => <div key={i} className="h-24 rounded-xl bg-muted animate-pulse" />)}</div>;
+    return (
+      <div className="space-y-6 max-w-6xl mx-auto">
+        <div className="h-16 skeleton-shimmer rounded-xl" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="space-y-3">
+              <SkeletonRow className="h-10" />
+              <SkeletonRow className="h-24" />
+              <SkeletonRow className="h-24" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div>
-        <h1 className="text-3xl font-display font-bold">Applications</h1>
-        <p className="text-muted-foreground mt-1">Track your job applications</p>
-      </div>
+    <div className="space-y-6 max-w-6xl mx-auto">
+      <PageHeader
+        title="Applications"
+        description="Track your job applications across all stages"
+        icon={ClipboardList}
+        badge={`${applications.length} total`}
+      />
 
-      <Tabs defaultValue="all">
-        <TabsList>
-          <TabsTrigger value="all">All ({applications.length})</TabsTrigger>
-          {statuses.map((s) => (
-            <TabsTrigger key={s} value={s} className="capitalize">
-              {s} ({applications.filter((a) => a.status === s).length})
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      {/* Kanban Board */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statuses.map((status) => {
+          const config = statusConfig[status];
+          const items = getByStatus(status);
 
-        {["all", ...statuses].map((tab) => (
-          <TabsContent key={tab} value={tab} className="space-y-3 mt-4">
-            {applications
-              .filter((a) => tab === "all" || a.status === tab)
-              .map((app, i) => (
-                <motion.div key={app.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                  <Card className="glass-card">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-display font-semibold truncate">{app.jobs?.title ?? "Unknown Job"}</h3>
-                          <div className="flex items-center gap-3 text-sm text-muted-foreground mt-0.5">
-                            <span className="flex items-center gap-1"><Building2 className="w-3.5 h-3.5" /> {app.jobs?.company ?? "Unknown"}</span>
-                            {app.jobs?.location && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {app.jobs.location}</span>}
-                          </div>
+          return (
+            <motion.div
+              key={status}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col"
+            >
+              {/* Column header */}
+              <div className={`flex items-center gap-2 px-3 py-2.5 rounded-t-xl border-b-2 ${config.header} bg-muted/30`}>
+                <div className={`w-2.5 h-2.5 rounded-full ${config.dot}`} />
+                <span className="text-sm font-semibold capitalize">{config.label}</span>
+                <span className="ml-auto text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded-full">
+                  {items.length}
+                </span>
+              </div>
+
+              {/* Column body */}
+              <div className="flex-1 space-y-2 p-2 bg-muted/10 rounded-b-xl min-h-[200px]">
+                {items.length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-8 opacity-50">No items</p>
+                )}
+                {items.map((app, i) => (
+                  <motion.div
+                    key={app.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.05 }}
+                  >
+                    <Card className="glass-card group">
+                      <CardContent className="p-3 space-y-2">
+                        <h4 className="text-sm font-semibold leading-tight truncate">
+                          {app.jobs?.title ?? "Unknown Job"}
+                        </h4>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Building2 className="w-3 h-3" />
+                          <span className="truncate">{app.jobs?.company ?? "Unknown"}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge className={statusColors[app.status]}>{app.status}</Badge>
+                        {app.jobs?.location && (
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <MapPin className="w-3 h-3" />
+                            <span className="truncate">{app.jobs.location}</span>
+                          </div>
+                        )}
+
+                        {/* Actions — visible on hover */}
+                        <div className="flex items-center gap-1 pt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Select value={app.status} onValueChange={(val) => updateStatus(app.id, val)}>
-                            <SelectTrigger className="w-32 h-8 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="h-7 text-xs flex-1">
+                              <SelectValue />
+                            </SelectTrigger>
                             <SelectContent>
-                              {statuses.map((s) => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
+                              {statuses.map((s) => (
+                                <SelectItem key={s} value={s} className="capitalize text-xs">{s}</SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                           {app.jobs?.job_url && (
-                            <Button variant="outline" size="icon" className="h-8 w-8" asChild>
-                              <a href={app.jobs.job_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-3.5 h-3.5" /></a>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" asChild>
+                              <a href={app.jobs.job_url} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
                             </Button>
                           )}
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => deleteApp(app.id)}>
-                            <Trash2 className="w-3.5 h-3.5" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
+                            onClick={() => deleteApp(app.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
                           </Button>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            {applications.filter((a) => tab === "all" || a.status === tab).length === 0 && (
-              <Card className="glass-card"><CardContent className="py-8 text-center text-muted-foreground">No applications in this category</CardContent></Card>
-            )}
-          </TabsContent>
-        ))}
-      </Tabs>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
     </div>
   );
 }
