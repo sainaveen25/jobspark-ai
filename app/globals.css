@@ -2,35 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @layer base {
   :root {
-    --background: 200 20% 98%;
-    --foreground: 200 50% 5%;
+    --background: 0 0% 99%;
+    --foreground: 210 20% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 200 50% 5%;
+    --card-foreground: 210 20% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 200 50% 5%;
+    --popover-foreground: 210 20% 10%;
     --primary: 174 100% 32%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 174 30% 94%;
-    --secondary-foreground: 174 100% 20%;
-    --muted: 200 20% 95%;
-    --muted-foreground: 200 10% 45%;
-    --accent: 174 40% 90%;
-    --accent-foreground: 174 100% 20%;
+    --secondary: 174 20% 96%;
+    --secondary-foreground: 174 80% 25%;
+    --muted: 210 15% 96%;
+    --muted-foreground: 210 10% 45%;
+    --accent: 174 20% 96%;
+    --accent-foreground: 174 80% 25%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 200 20% 90%;
-    --input: 200 20% 90%;
+    --border: 210 15% 92%;
+    --input: 210 15% 92%;
     --ring: 174 100% 32%;
-    --radius: 1rem;
-    --sidebar-background: 200 30% 8%;
-    --sidebar-foreground: 200 10% 80%;
+    --radius: 0.75rem;
+    --sidebar-background: 210 20% 7%;
+    --sidebar-foreground: 210 10% 75%;
     --sidebar-primary: 174 100% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 200 20% 14%;
-    --sidebar-accent-foreground: 200 10% 90%;
-    --sidebar-border: 200 20% 16%;
+    --sidebar-accent: 210 15% 12%;
+    --sidebar-accent-foreground: 210 10% 90%;
+    --sidebar-border: 210 15% 14%;
     --sidebar-ring: 174 100% 42%;
     --success: 152 69% 40%;
     --success-foreground: 0 0% 100%;
@@ -39,32 +41,32 @@
   }
 
   .dark {
-    --background: 200 30% 5%;
-    --foreground: 200 10% 95%;
-    --card: 200 25% 8%;
-    --card-foreground: 200 10% 95%;
-    --popover: 200 25% 8%;
-    --popover-foreground: 200 10% 95%;
+    --background: 210 20% 5%;
+    --foreground: 210 10% 95%;
+    --card: 210 18% 7%;
+    --card-foreground: 210 10% 95%;
+    --popover: 210 18% 7%;
+    --popover-foreground: 210 10% 95%;
     --primary: 174 100% 42%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 200 20% 14%;
+    --secondary: 210 15% 12%;
     --secondary-foreground: 174 80% 70%;
-    --muted: 200 20% 12%;
-    --muted-foreground: 200 10% 55%;
-    --accent: 200 20% 14%;
+    --muted: 210 15% 10%;
+    --muted-foreground: 210 10% 55%;
+    --accent: 210 15% 12%;
     --accent-foreground: 174 80% 70%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 100%;
-    --border: 200 20% 15%;
-    --input: 200 20% 15%;
+    --border: 210 15% 14%;
+    --input: 210 15% 14%;
     --ring: 174 100% 42%;
-    --sidebar-background: 200 30% 5%;
-    --sidebar-foreground: 200 10% 80%;
+    --sidebar-background: 210 20% 4%;
+    --sidebar-foreground: 210 10% 70%;
     --sidebar-primary: 174 100% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 200 20% 10%;
-    --sidebar-accent-foreground: 200 10% 90%;
-    --sidebar-border: 200 20% 12%;
+    --sidebar-accent: 210 15% 8%;
+    --sidebar-accent-foreground: 210 10% 90%;
+    --sidebar-border: 210 15% 10%;
     --sidebar-ring: 174 100% 42%;
   }
 
@@ -78,53 +80,38 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
-    background-image:
-      radial-gradient(circle at top left, rgba(22, 199, 179, 0.18), transparent 24%),
-      radial-gradient(circle at top right, rgba(121, 82, 255, 0.08), transparent 18%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(244, 250, 249, 0.92));
   }
 
   .dark body {
-    background-image:
-      radial-gradient(circle at top left, rgba(22, 199, 179, 0.2), transparent 22%),
-      radial-gradient(circle at top right, rgba(91, 123, 255, 0.16), transparent 18%),
-      linear-gradient(180deg, rgba(8, 16, 20, 1), rgba(10, 20, 26, 1));
+    background-color: hsl(210 20% 5%);
   }
 }
 
 @layer utilities {
   .glass {
-    @apply border border-white/25 bg-white/65 shadow-[0_30px_80px_-35px_rgba(15,23,42,0.45)] backdrop-blur-2xl;
+    @apply border border-border/60 bg-card/90 backdrop-blur-sm;
   }
 
   .glass-card {
-    @apply glass rounded-3xl;
+    @apply glass rounded-2xl;
   }
 
-  .panel-grid {
-    background-image:
-      linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
-    background-size: 28px 28px;
-  }
-
-  .text-gradient {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #0f766e, #14b8a6 45%, #2dd4bf);
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(174 100% 32%), hsl(174 80% 38%));
   }
 
   .animate-enter {
-    animation: enter 0.45s ease-out;
+    animation: enter 0.3s ease-out;
   }
 }
 
 @keyframes enter {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(8px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
