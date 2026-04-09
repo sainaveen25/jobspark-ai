@@ -14,7 +14,7 @@ export function ThemeToggle() {
       type="button"
       variant="outline"
       size="icon"
-      className="rounded-full border-white/40 bg-white/40 backdrop-blur-xl dark:border-white/10 dark:bg-white/5"
+      className="h-8 w-8 rounded-lg"
       onClick={() => setTheme(isDark ? "light" : "dark")}
     >
       {isDark ? <SunMedium className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
