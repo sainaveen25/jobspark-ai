@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { ExternalLink, MapPin, RefreshCw, Search, Star, Sparkles, Filter, ChevronDown, Clock, Building2 } from "lucide-react";
+import { ExternalLink, MapPin, RefreshCw, Search, Star, Sparkles, Filter, ChevronDown, Clock, Building2, BriefcaseBusiness } from "lucide-react";
 import { formatDistanceToNow, subHours } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/lib/toast";

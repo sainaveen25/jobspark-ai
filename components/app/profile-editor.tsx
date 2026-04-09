@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, Trash2, X, User, Briefcase, Target, Code, MapPin } from "lucide-react";
+import { Plus, Trash2, X, User, Briefcase, Target, Code, MapPin, Loader2 } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 import { Badge } from "@/components/ui/badge";
