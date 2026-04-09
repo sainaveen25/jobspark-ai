@@ -3,6 +3,7 @@ import "server-only";
 import { subHours } from "date-fns";
 
 import { serverEnv } from "@/lib/env";
+import type { Row } from "@/lib/database.types";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { unwrapSupabaseResult } from "@/lib/supabase/queries";
 import { slugify } from "@/lib/utils";
@@ -36,7 +37,28 @@ interface ApifyDatasetItem {
   postedAt?: string;
 }
 
-const actorConfigs = [
+interface ActorConfig {
+  actorId: string;
+  source: string;
+}
+
+export interface ActorSyncStatus {
+  source: string;
+  actorId: string;
+  ok: boolean;
+  synced: number;
+  error?: string;
+}
+
+export interface JobsSyncResult {
+  jobs: Row<"jobs">[];
+  statuses: ActorSyncStatus[];
+  partial: boolean;
+}
+
+const REQUEST_TIMEOUT_MS = 25_000;
+
+const actorConfigs: ActorConfig[] = [
   { actorId: serverEnv.apifyGreenhouseActorId, source: "greenhouse" },
   { actorId: serverEnv.apifyLeverActorId, source: "lever" },
   { actorId: serverEnv.apifyWorkdayActorId, source: "workday" }
@@ -65,49 +87,115 @@ function normalizeJob(item: ApifyDatasetItem, source: string): NormalizedJob | n
   };
 }
 
-async function runActor(actorId: string, source: string) {
-  const safeActorId = actorId.replace(/\//g, "~");
-  const response = await fetch(`https://api.apify.com/v2/acts/${safeActorId}/run-sync-get-dataset-items?token=${serverEnv.apifyToken}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      maxItems: 40,
-      recentDays: 2
-    }),
-    cache: "no-store"
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Apify actor ${source} failed with status ${response.status}: ${errorText}`);
+function normalizeApifyError(source: string, status: number, body: string) {
+  if (status === 401 || status === 403) {
+    return `Apify ${source}: invalid APIFY_TOKEN or unauthorized actor access`;
   }
 
-  const dataset = (await response.json()) as ApifyDatasetItem[];
-  return dataset
-    .map((item) => normalizeJob(item, source))
-    .filter((job): job is NormalizedJob => Boolean(job));
+  if (status === 404) {
+    return `Apify ${source}: actor not found (check actor ID)`;
+  }
+
+  if (status === 429) {
+    return `Apify ${source}: rate limited`;
+  }
+
+  const condensed = body.slice(0, 180);
+  return `Apify ${source}: request failed (${status})${condensed ? ` - ${condensed}` : ""}`;
 }
 
-export async function fetchJobs() {
+async function runActor(config: ActorConfig): Promise<{ jobs: NormalizedJob[]; status: ActorSyncStatus }> {
+  const safeActorId = config.actorId.replace(/\//g, "~");
+  const endpoint = new URL(`https://api.apify.com/v2/acts/${safeActorId}/run-sync-get-dataset-items`);
+  endpoint.searchParams.set("token", serverEnv.apifyToken);
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        maxItems: 40,
+        recentDays: 2
+      }),
+      cache: "no-store",
+      signal: controller.signal
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      return {
+        jobs: [],
+        status: {
+          source: config.source,
+          actorId: config.actorId,
+          ok: false,
+          synced: 0,
+          error: normalizeApifyError(config.source, response.status, errorText)
+        }
+      };
+    }
+
+    const dataset = (await response.json()) as ApifyDatasetItem[];
+    const jobs = dataset
+      .map((item) => normalizeJob(item, config.source))
+      .filter((job): job is NormalizedJob => Boolean(job));
+
+    return {
+      jobs,
+      status: {
+        source: config.source,
+        actorId: config.actorId,
+        ok: true,
+        synced: jobs.length
+      }
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error && error.name === "AbortError"
+        ? `Apify ${config.source}: request timed out after ${REQUEST_TIMEOUT_MS / 1000}s`
+        : error instanceof Error
+          ? `Apify ${config.source}: ${error.message}`
+          : `Apify ${config.source}: unknown failure`;
+
+    return {
+      jobs: [],
+      status: {
+        source: config.source,
+        actorId: config.actorId,
+        ok: false,
+        synced: 0,
+        error: message
+      }
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export async function fetchJobs(): Promise<JobsSyncResult> {
   if (!actorConfigs.length) {
     throw new Error("At least one Apify actor ID must be configured");
   }
 
   const cutoff = subHours(new Date(), 48).getTime();
-  const actorResults = await Promise.allSettled(actorConfigs.map((actor) => runActor(actor.actorId, actor.source)));
+  const actorResults = await Promise.all(actorConfigs.map((actor) => runActor(actor)));
+
   const deduped = new Map<string, NormalizedJob>();
-  const failures: string[] = [];
+  const statuses: ActorSyncStatus[] = actorResults.map((result) => result.status);
 
   for (const result of actorResults) {
-    if (result.status === "rejected") {
-      failures.push(result.reason instanceof Error ? result.reason.message : "Unknown Apify failure");
+    if (!result.status.ok) {
       continue;
     }
 
-    for (const job of result.value) {
-      const postedDate = job.posted_date ? new Date(job.posted_date).getTime() : Date.now();
+    for (const job of result.jobs) {
+      const parsedPostedDate = job.posted_date ? new Date(job.posted_date).getTime() : Date.now();
+      const postedDate = Number.isNaN(parsedPostedDate) ? Date.now() : parsedPostedDate;
 
       if (postedDate < cutoff) {
         continue;
@@ -119,8 +207,19 @@ export async function fetchJobs() {
     }
   }
 
-  if (!deduped.size && failures.length) {
-    throw new Error(failures.join("; "));
+  const hasAnySuccess = statuses.some((status) => status.ok);
+  const failedStatuses = statuses.filter((status) => !status.ok);
+
+  if (!hasAnySuccess && failedStatuses.length) {
+    throw new Error(failedStatuses.map((status) => status.error).filter(Boolean).join("; "));
+  }
+
+  if (!deduped.size) {
+    return {
+      jobs: [],
+      statuses,
+      partial: failedStatuses.length > 0
+    };
   }
 
   const admin = getSupabaseAdminClient();
@@ -132,7 +231,11 @@ export async function fetchJobs() {
       .select("*")
       .order("posted_date", { ascending: false }),
     "Unable to store synced jobs"
-  );
+  ) as Row<"jobs">[];
 
-  return persistedJobs;
+  return {
+    jobs: persistedJobs,
+    statuses,
+    partial: failedStatuses.length > 0
+  };
 }

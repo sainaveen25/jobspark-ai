@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { ExternalLink, MapPin, RefreshCw, Search, ShieldCheck, Sparkles, Star } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { motion } from "framer-motion";
@@ -36,6 +36,14 @@ interface ApplyAssistState {
   jobUrl: string | null;
 }
 
+interface SyncStatus {
+  source: string;
+  actorId: string;
+  ok: boolean;
+  synced: number;
+  error?: string;
+}
+
 export function JobsBoard({
   initialJobs,
   initialApplications,
@@ -57,8 +65,22 @@ export function JobsBoard({
   const [locationFilter, setLocationFilter] = useState("all");
   const [visaFilter, setVisaFilter] = useState("all");
   const [syncing, startSync] = useTransition();
+  const [syncStatuses, setSyncStatuses] = useState<SyncStatus[]>([]);
+  const [configWarning, setConfigWarning] = useState<string | null>(null);
   const [savingJobId, setSavingJobId] = useState<string | null>(null);
   const [assistState, setAssistState] = useState<ApplyAssistState | null>(null);
+
+  useEffect(() => {
+    const loadHealth = async () => {
+      const response = await fetch("/api/health/config");
+      const payload = (await response.json()) as { warnings?: string[] };
+      if (payload.warnings?.length) {
+        setConfigWarning(payload.warnings[0]);
+      }
+    };
+
+    void loadHealth();
+  }, []);
 
   const locations = useMemo(
     () => Array.from(new Set(jobs.map((job) => job.location).filter(Boolean) as string[])).sort(),
@@ -95,6 +117,8 @@ export function JobsBoard({
         return;
       }
 
+      setSyncStatuses(payload.statuses ?? []);
+
       const jobsResponse = await fetch("/api/jobs");
       const jobsPayload = await jobsResponse.json();
 
@@ -107,7 +131,11 @@ export function JobsBoard({
       setJobs(jobsPayload.jobs ?? []);
       setApplications(jobsPayload.applications ?? []);
       setLoadError(null);
-      toast.success(`Synced ${payload.synced ?? 0} jobs`);
+      if (payload.partial) {
+        toast.message(`Synced ${payload.synced ?? 0} jobs with partial source failures`);
+      } else {
+        toast.success(`Synced ${payload.synced ?? 0} jobs`);
+      }
     });
   };
 
@@ -208,6 +236,34 @@ export function JobsBoard({
           <p className="mt-4 rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
             {loadError}
           </p>
+        ) : null}
+
+        <p className="mt-4 rounded-2xl border border-border/60 bg-background/50 px-4 py-3 text-sm text-muted-foreground">
+          Jobs load instantly from your database cache. Use Refresh job feeds to fetch the latest sources in the background.
+        </p>
+
+        {configWarning ? (
+          <p className="mt-3 rounded-2xl border border-amber-300/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+            {configWarning}
+          </p>
+        ) : null}
+
+        {syncStatuses.length ? (
+          <div className="mt-3 rounded-2xl border border-border/60 bg-background/50 p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Latest sync status</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {syncStatuses.map((status) => (
+                <Badge
+                  key={`${status.source}-${status.actorId}`}
+                  variant={status.ok ? "outline" : "secondary"}
+                  className={status.ok ? "border-emerald-500/40 text-emerald-700 dark:text-emerald-300" : "text-destructive"}
+                  title={status.error}
+                >
+                  {status.source}: {status.ok ? `${status.synced} jobs` : "failed"}
+                </Badge>
+              ))}
+            </div>
+          </div>
         ) : null}
       </section>
 

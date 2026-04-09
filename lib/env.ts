@@ -6,16 +6,31 @@ const readRequiredEnv = (key: string): string => {
   return value;
 };
 
-// Lazy getters — values are only resolved and validated when first accessed
+const readOptionalEnv = (key: string): string | null => {
+  const value = process.env[key];
+  return value ? value : null;
+};
+
+// Lazy getters - values are only resolved and validated when first accessed
 // at request time, NOT during the static build phase. This prevents build
-// failures in environments (e.g. Lovable, Vercel) that inject env vars at
-// runtime rather than build time.
+// failures in environments that inject env vars at runtime rather than build time.
 export const publicEnv = {
   get nextPublicSupabaseUrl() {
     return readRequiredEnv("NEXT_PUBLIC_SUPABASE_URL");
   },
   get nextPublicSupabaseAnonKey() {
-    return readRequiredEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const legacyPublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+    if (anonKey) {
+      return anonKey;
+    }
+
+    if (legacyPublishableKey) {
+      return legacyPublishableKey;
+    }
+
+    throw new Error("Missing required environment variable: NEXT_PUBLIC_SUPABASE_ANON_KEY");
   }
 };
 
@@ -45,3 +60,49 @@ export const serverEnv = {
     return process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
   }
 };
+
+export function getConfigHealth() {
+  const required = {
+    NEXT_PUBLIC_SUPABASE_URL: Boolean(readOptionalEnv("NEXT_PUBLIC_SUPABASE_URL")),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: Boolean(
+      readOptionalEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY") ?? readOptionalEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY")
+    ),
+    SUPABASE_SERVICE_ROLE_KEY: Boolean(readOptionalEnv("SUPABASE_SERVICE_ROLE_KEY"))
+  };
+
+  const optional = {
+    OPENAI_API_KEY: Boolean(readOptionalEnv("OPENAI_API_KEY")),
+    APIFY_TOKEN: Boolean(readOptionalEnv("APIFY_TOKEN")),
+    APIFY_GREENHOUSE_ACTOR_ID: Boolean(readOptionalEnv("APIFY_GREENHOUSE_ACTOR_ID")),
+    APIFY_LEVER_ACTOR_ID: Boolean(readOptionalEnv("APIFY_LEVER_ACTOR_ID")),
+    APIFY_WORKDAY_ACTOR_ID: Boolean(readOptionalEnv("APIFY_WORKDAY_ACTOR_ID"))
+  };
+
+  const warnings: string[] = [];
+
+  if (!readOptionalEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY") && readOptionalEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY")) {
+    warnings.push("Using legacy NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY. Rename it to NEXT_PUBLIC_SUPABASE_ANON_KEY.");
+  }
+
+  if (!optional.APIFY_TOKEN) {
+    warnings.push("APIFY_TOKEN is missing. Job sync is disabled until this is configured.");
+  }
+
+  if (
+    optional.APIFY_TOKEN &&
+    !optional.APIFY_GREENHOUSE_ACTOR_ID &&
+    !optional.APIFY_LEVER_ACTOR_ID &&
+    !optional.APIFY_WORKDAY_ACTOR_ID
+  ) {
+    warnings.push("APIFY_TOKEN is set but no APIFY actor IDs are configured.");
+  }
+
+  warnings.push("If any API keys were exposed in source control, rotate them before production use.");
+
+  return {
+    ok: Object.values(required).every(Boolean),
+    required,
+    optional,
+    warnings
+  };
+}

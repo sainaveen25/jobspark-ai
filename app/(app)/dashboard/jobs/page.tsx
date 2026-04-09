@@ -1,4 +1,3 @@
-import { fetchJobs } from "@/lib/apify";
 import type { Row } from "@/lib/database.types";
 import { calculateMatchScore } from "@/lib/match-score";
 import { unwrapSupabaseResult } from "@/lib/supabase/queries";
@@ -15,14 +14,6 @@ export default async function JobsPage() {
 
   if (!user) {
     return null;
-  }
-
-  let syncError: string | null = null;
-
-  try {
-    await fetchJobs();
-  } catch (error) {
-    syncError = error instanceof Error ? error.message : "Unable to refresh jobs";
   }
 
   const [jobsResponse, applicationsResponse, profileResponse, skillsResponse, experiencesResponse, resumesResponse] =
@@ -63,7 +54,7 @@ export default async function JobsPage() {
       initialApplications={applications}
       visaStatus={profile?.visa_status ?? null}
       preferredLocations={profile?.preferred_locations ?? []}
-      initialError={syncError}
+      initialError={null}
     />
   );
 }

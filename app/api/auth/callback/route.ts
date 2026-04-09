@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { requiresMfaSetup } from "@/lib/mfa";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
@@ -13,6 +14,14 @@ export async function GET(request: Request) {
 
     if (error) {
       return NextResponse.redirect(new URL(`/auth?error=${encodeURIComponent(error.message)}`, url.origin));
+    }
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
+    if (requiresMfaSetup(user)) {
+      return NextResponse.redirect(new URL(`/auth?step=mfa&next=${encodeURIComponent(next)}`, url.origin));
     }
   }
 

@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 import { publicEnv } from "@/lib/env";
+import { requiresMfaSetup } from "@/lib/mfa";
 import type { Database } from "@/lib/database.types";
 
 const protectedPaths = ["/dashboard", "/profile", "/settings"];
@@ -41,7 +42,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (session && pathname === "/auth") {
+  if (session && isProtected && requiresMfaSetup(session.user)) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/auth";
+    redirectUrl.searchParams.set("step", "mfa");
+    redirectUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (session && pathname === "/auth" && !requiresMfaSetup(session.user)) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/dashboard";
     return NextResponse.redirect(redirectUrl);
