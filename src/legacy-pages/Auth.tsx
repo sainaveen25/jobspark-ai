@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Briefcase, Mail, Lock, User } from "lucide-react";
@@ -21,11 +21,8 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      toast.error(error.message);
-    } else {
-      navigate("/");
-    }
+    if (error) toast.error(error.message);
+    else navigate("/");
     setLoading(false);
   };
 
@@ -40,64 +37,60 @@ export default function Auth() {
         emailRedirectTo: window.location.origin,
       },
     });
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Check your email for a confirmation link!");
-    }
+    if (error) toast.error(error.message);
+    else toast.success("Check your email for a confirmation link!");
     setLoading(false);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full gradient-primary opacity-10 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full gradient-primary opacity-10 blur-3xl" />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md relative z-10"
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-sm relative z-10"
       >
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-              <Briefcase className="w-5 h-5 text-primary-foreground" />
+          <div className="inline-flex items-center gap-2 mb-3">
+            <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center">
+              <Briefcase className="w-4 h-4 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-display font-bold text-foreground">JobHive</h1>
+            <h1 className="text-xl font-bold text-foreground">JobHive</h1>
           </div>
-          <p className="text-muted-foreground">Your AI-powered job search assistant</p>
+          <p className="text-sm text-muted-foreground">Your AI-powered job search assistant</p>
         </div>
 
-        <Card className="glass-card">
+        <Card className="border border-border/60 bg-card/90 backdrop-blur-sm shadow-xl shadow-black/5">
           <Tabs defaultValue="signin">
             <CardHeader className="pb-2">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 h-9">
+                <TabsTrigger value="signin" className="text-sm">Sign In</TabsTrigger>
+                <TabsTrigger value="signup" className="text-sm">Sign Up</TabsTrigger>
               </TabsList>
             </CardHeader>
 
             <TabsContent value="signin">
               <form onSubmit={handleSignIn}>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
+                <CardContent className="space-y-4 pt-2">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground">Email</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input id="signin-email" type="email" placeholder="you@example.com" className="pl-10" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                      <Input type="email" placeholder="you@example.com" className="pl-10 h-10 bg-background/50" value={email} onChange={(e) => setEmail(e.target.value)} required />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-password">Password</Label>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground">Password</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input id="signin-password" type="password" placeholder="••••••••" className="pl-10" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                      <Input type="password" placeholder="••••••••" className="pl-10 h-10 bg-background/50" value={password} onChange={(e) => setPassword(e.target.value)} required />
                     </div>
                   </div>
-                  <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={loading}>
+                  <Button type="submit" className="w-full h-10 gradient-primary text-primary-foreground" disabled={loading}>
                     {loading ? "Signing in..." : "Sign In"}
                   </Button>
                 </CardContent>
@@ -106,29 +99,29 @@ export default function Auth() {
 
             <TabsContent value="signup">
               <form onSubmit={handleSignUp}>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
+                <CardContent className="space-y-4 pt-2">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground">Full Name</Label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input id="signup-name" placeholder="John Doe" className="pl-10" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                      <Input placeholder="John Doe" className="pl-10 h-10 bg-background/50" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground">Email</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input id="signup-email" type="email" placeholder="you@example.com" className="pl-10" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                      <Input type="email" placeholder="you@example.com" className="pl-10 h-10 bg-background/50" value={email} onChange={(e) => setEmail(e.target.value)} required />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground">Password</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input id="signup-password" type="password" placeholder="••••••••" className="pl-10" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                      <Input type="password" placeholder="••••••••" className="pl-10 h-10 bg-background/50" value={password} onChange={(e) => setPassword(e.target.value)} required />
                     </div>
                   </div>
-                  <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={loading}>
+                  <Button type="submit" className="w-full h-10 gradient-primary text-primary-foreground" disabled={loading}>
                     {loading ? "Creating account..." : "Create Account"}
                   </Button>
                 </CardContent>
