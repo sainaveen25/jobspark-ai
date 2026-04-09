@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Upload, FileText, Sparkles, Loader2, Copy, Download, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { PageHeader } from "@/components/PageHeader";
 import { Progress } from "@/components/ui/progress";
 
 export default function Resume() {
@@ -130,19 +129,19 @@ export default function Resume() {
   const selectedResumeData = resumes.find((r) => r.id === selectedResume);
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <PageHeader
-        title="Resume Studio"
-        description="Upload, optimize, and tailor your resume with AI"
-        icon={FileText}
-      />
+    <div className="space-y-6 max-w-5xl mx-auto">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Resume Studio</h1>
+        <p className="text-sm text-muted-foreground mt-1">Upload, optimize, and tailor your resume with AI</p>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left: Upload + Select */}
-        <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-          <Card className="glass-card">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Left: Upload + Original */}
+        <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+          <Card className="border border-border/60 bg-card/80">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <Upload className="w-4 h-4 text-primary" /> Upload Resume
               </CardTitle>
             </CardHeader>
@@ -151,35 +150,35 @@ export default function Resume() {
                 onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={handleDrop}
-                className={`flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
-                  dragOver ? "border-primary bg-primary/5 scale-[1.01]" : "border-border hover:border-primary/40 bg-muted/20"
+                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
+                  dragOver ? "border-primary bg-primary/5" : "border-border/80 hover:border-primary/40 bg-muted/10"
                 }`}
               >
-                <Upload className={`w-8 h-8 mb-2 transition-colors ${dragOver ? "text-primary" : "text-muted-foreground"}`} />
-                <span className="text-sm text-muted-foreground font-medium">
+                <Upload className={`w-7 h-7 mb-2 ${dragOver ? "text-primary" : "text-muted-foreground/50"}`} />
+                <span className="text-sm text-muted-foreground">
                   {uploading ? "Uploading..." : "Drop PDF here or click to upload"}
                 </span>
-                <span className="text-xs text-muted-foreground/60 mt-1">PDF files only</span>
+                <span className="text-[11px] text-muted-foreground/50 mt-0.5">PDF files only</span>
                 <input type="file" accept=".pdf" className="hidden" onChange={handleFileChange} disabled={uploading} />
               </label>
 
               {resumes.length > 0 && (
                 <div className="mt-4 space-y-1.5">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Your Resumes</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Your Resumes</p>
                   {resumes.map((resume) => (
                     <button
                       key={resume.id}
                       onClick={() => setSelectedResume(resume.id)}
                       className={`flex items-center gap-3 w-full p-3 rounded-lg text-left transition-all ${
                         selectedResume === resume.id
-                          ? "bg-primary/10 border border-primary/30 shadow-sm"
-                          : "bg-muted/30 hover:bg-muted/50 border border-transparent"
+                          ? "bg-primary/8 border border-primary/20"
+                          : "hover:bg-muted/30 border border-transparent"
                       }`}
                     >
                       <FileText className={`w-4 h-4 shrink-0 ${selectedResume === resume.id ? "text-primary" : "text-muted-foreground"}`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">Resume</p>
-                        <p className="text-xs text-muted-foreground">{new Date(resume.created_at).toLocaleDateString()}</p>
+                        <p className="text-[11px] text-muted-foreground">{new Date(resume.created_at).toLocaleDateString()}</p>
                       </div>
                       {selectedResume === resume.id && <CheckCircle2 className="w-4 h-4 text-primary" />}
                     </button>
@@ -189,14 +188,13 @@ export default function Resume() {
             </CardContent>
           </Card>
 
-          {/* Original resume text */}
           {selectedResumeData?.parsed_text && (
-            <Card className="glass-card">
+            <Card className="border border-border/60 bg-card/80">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold">Original Resume</CardTitle>
+                <CardTitle className="text-sm font-semibold">Original Resume</CardTitle>
               </CardHeader>
               <CardContent>
-                <pre className="text-xs whitespace-pre-wrap text-muted-foreground max-h-64 overflow-auto p-3 rounded-lg bg-muted/30 border border-border/50">
+                <pre className="text-xs whitespace-pre-wrap text-muted-foreground max-h-64 overflow-auto p-3 rounded-lg bg-muted/20 border border-border/40">
                   {selectedResumeData.parsed_text}
                 </pre>
               </CardContent>
@@ -205,29 +203,29 @@ export default function Resume() {
         </motion.div>
 
         {/* Right: Optimize + Result */}
-        <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="space-y-4">
-          <Card className="glass-card">
+        <motion.div initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.08 }} className="space-y-4">
+          <Card className="border border-border/60 bg-card/80">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-primary" /> AI Optimization
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
                   Job Description
                 </label>
                 <Textarea
                   placeholder="Paste the target job description here..."
-                  className="min-h-[140px] resize-none text-sm"
+                  className="min-h-[120px] resize-none text-sm bg-background/50"
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
                 />
               </div>
 
               {optimizing && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                     <span>Optimizing with AI...</span>
                     <span>{Math.round(optimizeProgress)}%</span>
                   </div>
@@ -238,7 +236,7 @@ export default function Resume() {
               <Button
                 onClick={handleOptimize}
                 disabled={optimizing || !selectedResume}
-                className="w-full gradient-primary text-primary-foreground shadow-md shadow-primary/20"
+                className="w-full h-10 gradient-primary text-primary-foreground shadow-sm"
               >
                 {optimizing ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Optimizing...</>
@@ -249,26 +247,25 @@ export default function Resume() {
             </CardContent>
           </Card>
 
-          {/* Optimized result */}
           {optimizedText && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <Card className="glass-card border-primary/20">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+              <Card className="border border-primary/20 bg-card/80">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base font-semibold text-primary">Optimized Resume</CardTitle>
+                    <CardTitle className="text-sm font-semibold text-primary">Optimized Resume</CardTitle>
                     <div className="flex gap-1.5">
-                      <Button variant="outline" size="sm" onClick={copyToClipboard} className="text-xs h-8">
-                        {copied ? <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> : <Copy className="w-3.5 h-3.5 mr-1.5" />}
+                      <Button variant="outline" size="sm" onClick={copyToClipboard} className="text-[11px] h-7">
+                        {copied ? <CheckCircle2 className="w-3 h-3 mr-1" /> : <Copy className="w-3 h-3 mr-1" />}
                         {copied ? "Copied" : "Copy"}
                       </Button>
-                      <Button variant="outline" size="sm" onClick={downloadText} className="text-xs h-8">
-                        <Download className="w-3.5 h-3.5 mr-1.5" /> Download
+                      <Button variant="outline" size="sm" onClick={downloadText} className="text-[11px] h-7">
+                        <Download className="w-3 h-3 mr-1" /> Download
                       </Button>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <pre className="text-xs whitespace-pre-wrap text-foreground max-h-80 overflow-auto p-4 rounded-lg bg-primary/[0.03] border border-primary/10">
+                  <pre className="text-xs whitespace-pre-wrap text-foreground max-h-80 overflow-auto p-3 rounded-lg bg-primary/[0.03] border border-primary/10">
                     {optimizedText}
                   </pre>
                 </CardContent>

@@ -9,7 +9,7 @@ const pageTitles: Record<string, string> = {
   "/jobs": "Jobs",
   "/applications": "Applications",
   "/resume": "Resume Studio",
-  "/settings": "Settings",
+  "/settings": "Profile",
 };
 
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -21,9 +21,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center gap-3 border-b border-border/50 bg-background/80 backdrop-blur-md px-4 sticky top-0 z-10">
+          <header className="h-12 flex items-center gap-3 border-b border-border/40 bg-background/95 backdrop-blur-sm px-4 sticky top-0 z-10">
             <SidebarTrigger className="shrink-0" />
-            <Separator orientation="vertical" className="h-5" />
+            <Separator orientation="vertical" className="h-4" />
             <span className="text-sm font-medium text-muted-foreground">{pageTitle}</span>
           </header>
           <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto">
