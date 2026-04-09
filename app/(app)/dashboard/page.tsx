@@ -1,4 +1,5 @@
-import { BriefcaseBusiness, ClipboardList, FileText, Sparkles } from "lucide-react";
+import { BriefcaseBusiness, ClipboardList, FileText, Sparkles, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,46 +30,76 @@ export default async function DashboardPage() {
   const profileData = unwrapSupabaseResult(profile, "Unable to load dashboard profile") as Row<"profiles"> | null;
 
   const statCards = [
-    { label: "Live jobs", value: unwrapSupabaseCount(jobs, "Unable to load job count"), icon: BriefcaseBusiness },
-    { label: "Tracked applications", value: unwrapSupabaseCount(applications, "Unable to load application count"), icon: ClipboardList },
-    { label: "Interview loops", value: unwrapSupabaseCount(interviews, "Unable to load interview count"), icon: Sparkles },
-    { label: "Resume versions", value: unwrapSupabaseCount(resumes, "Unable to load resume count"), icon: FileText }
+    { label: "Live jobs", value: unwrapSupabaseCount(jobs, "Unable to load job count"), icon: BriefcaseBusiness, color: "text-primary" },
+    { label: "Applications", value: unwrapSupabaseCount(applications, "Unable to load application count"), icon: ClipboardList, color: "text-amber-500" },
+    { label: "Interviews", value: unwrapSupabaseCount(interviews, "Unable to load interview count"), icon: Sparkles, color: "text-emerald-500" },
+    { label: "Resumes", value: unwrapSupabaseCount(resumes, "Unable to load resume count"), icon: FileText, color: "text-primary" }
+  ];
+
+  const quickActions = [
+    { title: "Browse Jobs", description: "Find your next opportunity", icon: BriefcaseBusiness, href: "/dashboard/jobs" },
+    { title: "Upload Resume", description: "AI-powered optimization", icon: FileText, href: "/dashboard/resume" },
+    { title: "Track Applications", description: "Manage your pipeline", icon: ClipboardList, href: "/dashboard/applications" },
   ];
 
   return (
-    <div className="space-y-6">
-      <section className="glass-card p-8">
-        <Badge className="rounded-full bg-teal-500/10 px-4 py-1.5 text-teal-700 dark:text-teal-300">Overview</Badge>
-        <h1 className="mt-4 text-4xl font-semibold tracking-tight">
-          Welcome back{profileData?.full_name ? `, ${profileData.full_name.split(" ")[0]}` : ""}.
+    <div className="space-y-8 max-w-5xl mx-auto">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">
+          Welcome back{profileData?.full_name ? `, ${profileData.full_name.split(" ")[0]}` : ""}
         </h1>
-        <p className="mt-3 max-w-3xl text-base text-muted-foreground">
-          Your pipeline is organized around profile-aware job matching, ATS-safe resume optimization, and a cleaner path
-          from discovery to interview.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-2">
-          {profileData?.current_role ? <Badge variant="secondary">{profileData.current_role}</Badge> : null}
-          {(profileData?.preferred_roles ?? []).slice(0, 3).map((role: string) => (
-            <Badge key={role} variant="outline">
-              {role}
-            </Badge>
-          ))}
-        </div>
-      </section>
+        <p className="text-sm text-muted-foreground mt-1">Here&apos;s your job search overview</p>
+        {((profileData?.preferred_roles as string[] | null) ?? []).length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            {((profileData?.preferred_roles as string[] | null) ?? []).slice(0, 3).map((role: string) => (
+              <Badge key={role} variant="outline" className="text-xs">{role}</Badge>
+            ))}
+          </div>
+        )}
+      </div>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {statCards.map((stat) => (
-          <Card key={stat.label} className="glass-card border-white/30">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
-              <stat.icon className="h-5 w-5 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-semibold tracking-tight">{stat.value}</div>
+          <Card key={stat.label} className="border border-border/60 bg-card/90">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium">{stat.label}</p>
+                  <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center">
+                  <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}
-      </section>
+      </div>
+
+      {/* Quick Actions */}
+      <div>
+        <h2 className="text-sm font-semibold text-foreground mb-3">Quick Actions</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {quickActions.map((action) => (
+            <Link
+              key={action.title}
+              href={action.href}
+              className="group flex items-center gap-3.5 p-4 rounded-xl border border-border/60 bg-card/90 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 transition-all duration-200"
+            >
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <action.icon className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground">{action.title}</p>
+                <p className="text-xs text-muted-foreground">{action.description}</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+            </Link>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

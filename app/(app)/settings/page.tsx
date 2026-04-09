@@ -1,49 +1,78 @@
-import { Shield, Sparkles, Workflow } from "lucide-react";
+import { Moon, Shield, Sparkles, SunMedium, Workflow } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ThemeToggle } from "@/components/app/theme-toggle";
 
 export default function SettingsPage() {
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Shield className="h-5 w-5 text-primary" />
-            Security posture
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm text-muted-foreground">
-          <p>Supabase RLS protects user profile, resume, and application records by authenticated owner.</p>
-          <Badge variant="secondary">Protected routes enabled</Badge>
-        </CardContent>
-      </Card>
+    <div className="max-w-3xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+        <p className="text-sm text-muted-foreground mt-1">App preferences and configuration</p>
+      </div>
 
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Workflow className="h-5 w-5 text-primary" />
-            Automation
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm text-muted-foreground">
-          <p>Use the job sync endpoint to refresh Greenhouse, Lever, and Workday pipelines on demand or via cron.</p>
-          <Badge variant="outline">POST /api/jobs/sync</Badge>
-        </CardContent>
-      </Card>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="border border-border/60 bg-card/90">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <SunMedium className="w-4 h-4 text-primary" />
+              </div>
+              Appearance
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">Toggle between light and dark mode</p>
+            <ThemeToggle />
+          </CardContent>
+        </Card>
 
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Sparkles className="h-5 w-5 text-primary" />
-            AI stack
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm text-muted-foreground">
-          <p>Resume optimization runs through the OpenAI chat completions API and stores versioned outputs for auditability.</p>
-          <Badge variant="secondary">Versioned resume outputs</Badge>
-        </CardContent>
-      </Card>
+        <Card className="border border-border/60 bg-card/90">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-primary" />
+              </div>
+              Security
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <p>Row-level security protects all your data by authenticated owner.</p>
+            <Badge variant="secondary">Protected routes enabled</Badge>
+          </CardContent>
+        </Card>
+
+        <Card className="border border-border/60 bg-card/90">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Workflow className="w-4 h-4 text-primary" />
+              </div>
+              Automation
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <p>Use the job sync endpoint to refresh pipelines on demand or via cron.</p>
+            <Badge variant="outline">POST /api/jobs/sync</Badge>
+          </CardContent>
+        </Card>
+
+        <Card className="border border-border/60 bg-card/90">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-primary" />
+              </div>
+              AI Stack
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <p>Resume optimization uses AI and stores versioned outputs for auditability.</p>
+            <Badge variant="secondary">Versioned outputs</Badge>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
