@@ -368,4 +368,3 @@ export function ProfileEditor({
   );
 }
 
-function Loader2Icon(props: any) { return <div {...props} />; }
