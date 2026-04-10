@@ -66,6 +66,7 @@
     "types/**/*.d.ts",
     "middleware.ts",
     "src/hooks/use-mobile.tsx",
+    "src/integrations/**/*.ts",
     ".next/types/**/*.ts"
   ]
 }

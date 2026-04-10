@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, Briefcase, FileText, KeyRound, Sparkles, Target, Zap } from "lucide-react";
 
-import { lovable } from "@/src/integrations/lovable/index";
+import { lovable } from "@/src/integrations/lovable";
 import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
