@@ -47,6 +47,7 @@
     "src/components/ui",
     "src/pages",
     "src/contexts",
+    "src/integrations",
     "src/App.tsx",
     "src/main.tsx",
     "supabase/functions",
