@@ -1,7 +1,15 @@
-import { ResumeStudio } from "@/components/app/resume-studio";
+import nextDynamic from "next/dynamic";
+
 import type { Row } from "@/lib/database.types";
 import { unwrapSupabaseResult } from "@/lib/supabase/queries";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+
+const ResumeStudio = nextDynamic(
+  () => import("@/components/app/resume-studio").then((mod) => mod.ResumeStudio),
+  {
+    loading: () => <div className="h-40 animate-pulse rounded-xl bg-muted/70" />
+  }
+);
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +25,7 @@ export default async function ResumePage() {
 
   const [resumesResponse, jobsResponse] = await Promise.all([
     supabase.from("resumes").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-    supabase.from("jobs").select("id,title,company").order("posted_date", { ascending: false }).limit(40)
+    supabase.from("jobs").select("id,title,company").order("created_at", { ascending: false }).order("posted_date", { ascending: false }).limit(40)
   ]);
 
   const resumes = (unwrapSupabaseResult(resumesResponse, "Unable to load resumes") ?? []) as Row<"resumes">[];
@@ -36,3 +44,4 @@ export default async function ResumePage() {
     />
   );
 }
+

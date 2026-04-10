@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const { supabase, user } = await requireUser();
     const [jobsResponse, applicationsResponse] = await Promise.all([
-      supabase.from("jobs").select("*").order("posted_date", { ascending: false }).limit(100),
+      supabase.from("jobs").select("*").order("created_at", { ascending: false }).order("posted_date", { ascending: false }).limit(100),
       supabase.from("applications").select("job_id,status").eq("user_id", user.id)
     ]);
 

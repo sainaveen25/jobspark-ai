@@ -1,8 +1,16 @@
+import nextDynamic from "next/dynamic";
+
 import type { Row } from "@/lib/database.types";
 import { calculateMatchScore } from "@/lib/match-score";
 import { unwrapSupabaseResult } from "@/lib/supabase/queries";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { JobsBoard } from "@/components/app/jobs-board";
+
+const JobsBoard = nextDynamic(
+  () => import("@/components/app/jobs-board").then((mod) => mod.JobsBoard),
+  {
+    loading: () => <div className="h-40 animate-pulse rounded-xl bg-muted/70" />
+  }
+);
 
 export const dynamic = "force-dynamic";
 
@@ -18,9 +26,9 @@ export default async function JobsPage() {
 
   const [jobsResponse, applicationsResponse, profileResponse, skillsResponse, experiencesResponse, resumesResponse] =
     await Promise.all([
-      supabase.from("jobs").select("*").order("posted_date", { ascending: false }).limit(60),
+      supabase.from("jobs").select("*").order("created_at", { ascending: false }).order("posted_date", { ascending: false }).limit(60),
       supabase.from("applications").select("*").eq("user_id", user.id),
-      supabase.from("profiles").select("preferred_roles,preferred_locations,visa_status").eq("user_id", user.id).single(),
+      supabase.from("profiles").select("preferred_roles,preferred_locations").eq("user_id", user.id).single(),
       supabase.from("skills").select("skill_name").eq("user_id", user.id),
       supabase.from("experiences").select("job_title,company,bullet_points").eq("user_id", user.id),
       supabase.from("resumes").select("parsed_text").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle()
@@ -52,9 +60,9 @@ export default async function JobsPage() {
     <JobsBoard
       initialJobs={jobs}
       initialApplications={applications}
-      visaStatus={profile?.visa_status ?? null}
       preferredLocations={profile?.preferred_locations ?? []}
       initialError={null}
     />
   );
 }
+

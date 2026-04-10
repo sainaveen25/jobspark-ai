@@ -4,19 +4,26 @@ import { serverEnv } from "@/lib/env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export async function POST() {
-  const supabase = await createServerSupabaseClient();
-  const callbackUrl = `${serverEnv.appUrl}/api/auth/callback`;
+  try {
+    const supabase = await createServerSupabaseClient();
+    const callbackUrl = `${serverEnv.appUrl}/api/auth/callback`;
 
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: callbackUrl
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: callbackUrl
+      }
+    });
+
+    if (error || !data.url) {
+      return NextResponse.json({ error: error?.message ?? "Unable to initiate Google login" }, { status: 500 });
     }
-  });
 
-  if (error || !data.url) {
-    return NextResponse.json({ error: error?.message ?? "Unable to initiate Google login" }, { status: 500 });
+    return NextResponse.redirect(data.url, { status: 302 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to initiate Google login" },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.redirect(data.url, { status: 302 });
 }

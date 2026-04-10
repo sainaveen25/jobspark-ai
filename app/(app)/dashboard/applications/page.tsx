@@ -1,6 +1,14 @@
-import { ApplicationsBoard } from "@/components/app/applications-board";
+import nextDynamic from "next/dynamic";
+
 import { unwrapSupabaseResult } from "@/lib/supabase/queries";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+
+const ApplicationsBoard = nextDynamic(
+  () => import("@/components/app/applications-board").then((mod) => mod.ApplicationsBoard),
+  {
+    loading: () => <div className="h-40 animate-pulse rounded-xl bg-muted/70" />
+  }
+);
 
 export const dynamic = "force-dynamic";
 
@@ -25,3 +33,4 @@ export default async function ApplicationsPage() {
 
   return <ApplicationsBoard initialApplications={(data as never[]) ?? []} />;
 }
+

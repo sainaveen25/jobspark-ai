@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { ExternalLink, MapPin, RefreshCw, Search, Star, Sparkles, Filter, ChevronDown, Clock, Building2, BriefcaseBusiness } from "lucide-react";
 import { formatDistanceToNow, subHours } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,6 +21,7 @@ interface JobRecord {
   job_url: string | null;
   source: string | null;
   posted_date: string | null;
+  created_at?: string | null;
   matchScore: number;
 }
 
@@ -42,13 +43,11 @@ export function JobsBoard({
   initialJobs,
   initialApplications,
   initialError,
-  visaStatus,
   preferredLocations
 }: {
   initialJobs: JobRecord[];
   initialApplications: ApplicationRecord[];
   initialError?: string | null;
-  visaStatus: string | null;
   preferredLocations: string[];
 }) {
   const [jobs, setJobs] = useState(initialJobs);
@@ -67,9 +66,19 @@ export function JobsBoard({
     [jobs]
   );
 
+  const sortedJobs = useMemo(
+    () =>
+      [...jobs].sort((a, b) => {
+        const aDate = new Date(a.created_at ?? a.posted_date ?? 0).getTime();
+        const bDate = new Date(b.created_at ?? b.posted_date ?? 0).getTime();
+        return bDate - aDate;
+      }),
+    [jobs]
+  );
+
   const filteredJobs = useMemo(() => {
     const now = new Date();
-    return jobs.filter((job) => {
+    return sortedJobs.filter((job) => {
       const matchesSearch =
         !search ||
         job.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -84,7 +93,7 @@ export function JobsBoard({
       }
       return matchesSearch && matchesLocation && matchesTime;
     });
-  }, [jobs, locationFilter, search, timeFilter]);
+  }, [locationFilter, search, sortedJobs, timeFilter]);
 
   const latestJobs = useMemo(() => filteredJobs.slice(0, 6), [filteredJobs]);
   const remainingJobs = useMemo(() => filteredJobs.slice(6), [filteredJobs]);
@@ -359,7 +368,7 @@ export function JobsBoard({
                 <p className="text-sm font-medium">Checklist</p>
                 <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
                   {assistState.checklist.map((item) => (
-                    <li key={item}>• {item}</li>
+                    <li key={item}>- {item}</li>
                   ))}
                 </ul>
               </div>
@@ -384,3 +393,4 @@ export function JobsBoard({
     </div>
   );
 }
+

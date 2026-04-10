@@ -49,46 +49,62 @@ export function ResumeStudio({
   const [progress, setProgress] = useState(0);
   const [dragOver, setDragOver] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [optimizationMessage, setOptimizationMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const selectedResume = useMemo(() => resumes.find((r) => r.id === selectedResumeId), [resumes, selectedResumeId]);
 
   const uploadResume = async (file: File) => {
-    setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    const response = await fetch("/api/resume/upload", { method: "POST", body: formData });
-    const payload = await response.json();
-    setUploading(false);
-    if (!response.ok) {
-      toast.error(payload.error ?? "Unable to upload resume");
-      return;
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/resume/upload", { method: "POST", body: formData });
+      const payload = await response.json();
+      if (!response.ok) {
+        toast.error(payload.error ?? "Unable to upload resume");
+        return;
+      }
+      setResumes((c) => [payload.resume, ...c]);
+      setSelectedResumeId(payload.resume.id);
+      toast.success("Resume uploaded and parsed");
+    } catch {
+      toast.error("Unable to upload resume");
+    } finally {
+      setUploading(false);
     }
-    setResumes((c) => [payload.resume, ...c]);
-    setSelectedResumeId(payload.resume.id);
-    toast.success("Resume uploaded and parsed");
   };
 
   const runOptimization = async () => {
+    setOptimizationMessage(null);
     setOptimizing(true);
     setProgress(0);
     const interval = setInterval(() => setProgress((p) => Math.min(p + Math.random() * 15, 90)), 500);
 
-    const response = await fetch("/api/resume/optimize", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ resumeId: selectedResumeId, jobId: selectedJobId })
-    });
-    const payload = await response.json();
-    clearInterval(interval);
-    setProgress(100);
-    setOptimizing(false);
-    if (!response.ok) {
-      toast.error(payload.error ?? "Unable to optimize resume");
-      return;
+    try {
+      const response = await fetch("/api/resume/optimize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resumeId: selectedResumeId, jobId: selectedJobId })
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        const errorText = payload.error ?? "Unable to optimize resume";
+        setOptimizationMessage({ type: "error", text: errorText });
+        toast.error(errorText);
+        return;
+      }
+      setOptimizedText(payload.optimizedText);
+      setMatchScore(payload.matchScore);
+      setOptimizationMessage({ type: "success", text: "Resume optimized successfully." });
+      toast.success("Resume optimized!");
+    } catch {
+      setOptimizationMessage({ type: "error", text: "Unable to optimize resume" });
+      toast.error("Unable to optimize resume");
+    } finally {
+      clearInterval(interval);
+      setProgress(100);
+      setOptimizing(false);
     }
-    setOptimizedText(payload.optimizedText);
-    setMatchScore(payload.matchScore);
-    toast.success("Resume optimized!");
   };
 
   const copyToClipboard = () => {
@@ -206,6 +222,18 @@ export function ResumeStudio({
                   </div>
                   <Progress value={progress} className="h-1.5" />
                 </div>
+              )}
+
+              {optimizationMessage && (
+                <p
+                  className={`rounded-lg border px-3 py-2 text-xs ${
+                    optimizationMessage.type === "success"
+                      ? "border-emerald-300/60 bg-emerald-50 text-emerald-700"
+                      : "border-destructive/40 bg-destructive/5 text-destructive"
+                  }`}
+                >
+                  {optimizationMessage.text}
+                </p>
               )}
 
               <Button className="w-full h-10 gradient-primary text-primary-foreground" onClick={runOptimization} disabled={!selectedResumeId || !selectedJobId || optimizing}>

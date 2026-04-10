@@ -82,6 +82,7 @@
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
+    overflow-x: hidden;
   }
 
   .dark body {

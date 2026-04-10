@@ -1,7 +1,15 @@
-import { ProfileEditor } from "@/components/app/profile-editor";
+import nextDynamic from "next/dynamic";
+
 import type { Row } from "@/lib/database.types";
 import { unwrapSupabaseResult } from "@/lib/supabase/queries";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+
+const ProfileEditor = nextDynamic(
+  () => import("@/components/app/profile-editor").then((mod) => mod.ProfileEditor),
+  {
+    loading: () => <div className="h-40 animate-pulse rounded-xl bg-muted/70" />
+  }
+);
 
 export const dynamic = "force-dynamic";
 
@@ -32,3 +40,4 @@ export default async function ProfilePage() {
     />
   );
 }
+
