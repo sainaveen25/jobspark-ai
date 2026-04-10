@@ -287,7 +287,7 @@ export default function AuthPage() {
                     {qrCode.startsWith("<svg") ? (
                       <div dangerouslySetInnerHTML={{ __html: qrCode }} />
                     ) : (
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
                       <img src={qrCode} alt="Authenticator QR code" className="h-48 w-48" />
                     )}
                   </div>
