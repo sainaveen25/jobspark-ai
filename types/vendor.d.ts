@@ -9,7 +9,7 @@ declare module "@lovable.dev/cloud-auth-js" {
     ): Promise<{
       redirected?: boolean;
       error?: Error | null;
-      tokens?: { access_token: string; refresh_token: string };
+      tokens: { access_token: string; refresh_token: string };
     }>;
   };
 }
