@@ -11,6 +11,7 @@ import Dashboard from "./legacy-pages/Dashboard";
 import Jobs from "./legacy-pages/Jobs";
 import Applications from "./legacy-pages/Applications";
 import Resume from "./legacy-pages/Resume";
+import ProfilePage from "./legacy-pages/Profile";
 import SettingsPage from "./legacy-pages/Settings";
 import NotFound from "./legacy-pages/NotFound";
 
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/jobs" element={<ProtectedRoute><AppLayout><Jobs /></AppLayout></ProtectedRoute>} />
             <Route path="/applications" element={<ProtectedRoute><AppLayout><Applications /></AppLayout></ProtectedRoute>} />
             <Route path="/resume" element={<ProtectedRoute><AppLayout><Resume /></AppLayout></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><AppLayout><ProfilePage /></AppLayout></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><AppLayout><SettingsPage /></AppLayout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
