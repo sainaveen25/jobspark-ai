@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,7 +37,7 @@ export default function Applications() {
   const [applications, setApplications] = useState<ApplicationWithJob[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     if (!user) return;
     const { data, error } = await supabase
       .from("applications")
@@ -47,9 +47,9 @@ export default function Applications() {
     if (error) toast.error("Failed to load applications");
     else setApplications((data as unknown as ApplicationWithJob[]) ?? []);
     setLoading(false);
-  };
+  }, [user]);
 
-  useEffect(() => { fetchApplications(); }, [user]);
+  useEffect(() => { void fetchApplications(); }, [fetchApplications]);
 
   const updateStatus = async (appId: string, status: string) => {
     const update: Record<string, unknown> = { status };
@@ -58,7 +58,7 @@ export default function Applications() {
     if (error) toast.error("Failed to update");
     else {
       toast.success(`Status updated to ${status}`);
-      fetchApplications();
+      void fetchApplications();
     }
   };
 
@@ -67,7 +67,7 @@ export default function Applications() {
     if (error) toast.error("Failed to delete");
     else {
       toast.success("Removed");
-      fetchApplications();
+      void fetchApplications();
     }
   };
 

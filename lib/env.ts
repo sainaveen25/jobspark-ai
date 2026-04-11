@@ -11,6 +11,29 @@ const readOptionalEnv = (key: string): string | null => {
   return value ? value : null;
 };
 
+const readFirstOptionalEnv = (...keys: string[]): string | null => {
+  for (const key of keys) {
+    const value = readOptionalEnv(key);
+    if (value) {
+      return value;
+    }
+  }
+
+  return null;
+};
+
+export const maskSecret = (value: string | null, visibleChars = 4): string | null => {
+  if (!value) {
+    return null;
+  }
+
+  if (value.length <= visibleChars * 2) {
+    return "*".repeat(value.length);
+  }
+
+  return `${value.slice(0, visibleChars)}${"*".repeat(Math.max(8, value.length - visibleChars * 2))}${value.slice(-visibleChars)}`;
+};
+
 // Lazy getters - values are only resolved and validated when first accessed
 // at request time, NOT during the static build phase. This prevents build
 // failures in environments that inject env vars at runtime rather than build time.
@@ -104,5 +127,28 @@ export function getConfigHealth() {
     required,
     optional,
     warnings
+  };
+}
+
+export function getRedactedSecretState() {
+  const gitApiSecret =
+    readFirstOptionalEnv("GITHUB_TOKEN", "GITHUB_API_KEY", "GIT_API_KEY");
+  const apifySecretPin =
+    readFirstOptionalEnv("APIFY_SECRET_PIN", "APPIFY_SECRET_PIN");
+  const apifyToken = readOptionalEnv("APIFY_TOKEN");
+
+  return {
+    gitApi: {
+      configured: Boolean(gitApiSecret),
+      maskedValue: maskSecret(gitApiSecret)
+    },
+    apifyToken: {
+      configured: Boolean(apifyToken),
+      maskedValue: maskSecret(apifyToken)
+    },
+    apifySecretPin: {
+      configured: Boolean(apifySecretPin),
+      maskedValue: maskSecret(apifySecretPin)
+    }
   };
 }

@@ -3,8 +3,11 @@ import { Moon, Shield, Sparkles, SunMedium, Workflow } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/app/theme-toggle";
+import { getRedactedSecretState } from "@/lib/env";
 
 export default function SettingsPage() {
+  const secrets = getRedactedSecretState();
+
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
@@ -70,6 +73,58 @@ export default function SettingsPage() {
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             <p>Resume optimization uses AI and stores versioned outputs for auditability.</p>
             <Badge variant="secondary">Versioned outputs</Badge>
+          </CardContent>
+        </Card>
+
+        <Card className="border border-border/60 bg-card/90 lg:col-span-2">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Moon className="w-4 h-4 text-primary" />
+              </div>
+              Integration Secrets
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm text-muted-foreground">
+            <p>Secrets stay server-side. The app only renders masked previews for verification.</p>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="space-y-1 rounded-md border border-border/60 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-medium text-foreground">Git API</span>
+                  <Badge variant={secrets.gitApi.configured ? "secondary" : "outline"}>
+                    {secrets.gitApi.configured ? "Configured" : "Missing"}
+                  </Badge>
+                </div>
+                <p className="font-mono text-xs">
+                  {secrets.gitApi.maskedValue ?? "Not set"}
+                </p>
+              </div>
+
+              <div className="space-y-1 rounded-md border border-border/60 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-medium text-foreground">Apify Token</span>
+                  <Badge variant={secrets.apifyToken.configured ? "secondary" : "outline"}>
+                    {secrets.apifyToken.configured ? "Configured" : "Missing"}
+                  </Badge>
+                </div>
+                <p className="font-mono text-xs">
+                  {secrets.apifyToken.maskedValue ?? "Not set"}
+                </p>
+              </div>
+
+              <div className="space-y-1 rounded-md border border-border/60 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-medium text-foreground">Apify Secret PIN</span>
+                  <Badge variant={secrets.apifySecretPin.configured ? "secondary" : "outline"}>
+                    {secrets.apifySecretPin.configured ? "Configured" : "Missing"}
+                  </Badge>
+                </div>
+                <p className="font-mono text-xs">
+                  {secrets.apifySecretPin.maskedValue ?? "Not set"}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
