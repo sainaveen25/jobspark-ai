@@ -63,7 +63,7 @@ export default function Dashboard() {
         <h1 className="text-2xl font-bold text-foreground">
           Welcome back, {profile.full_name?.split(" ")[0] || "there"}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Here's your job search overview</p>
+        <p className="text-sm text-muted-foreground mt-1">Here&apos;s your job search overview</p>
       </div>
 
       {/* Stats */}
