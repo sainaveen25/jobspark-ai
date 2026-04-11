@@ -1,5 +1,10 @@
 "use client";
 
+import dynamic from "next/dynamic";
+
+export const runtime = "edge";
+
+
 import { FormEvent, useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, Briefcase, FileText, KeyRound, Sparkles, Target, Zap } from "lucide-react";
