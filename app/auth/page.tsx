@@ -1,8 +1,5 @@
 "use client";
 
-// Prevent static prerendering — the Supabase client reads import.meta.env at module scope
-export const dynamic = "force-dynamic";
-
 import { FormEvent, useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, Briefcase, FileText, KeyRound, Sparkles, Target, Zap } from "lucide-react";
