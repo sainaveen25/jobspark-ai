@@ -1,4 +1,4 @@
-import { LayoutDashboard, Briefcase, FileText, ClipboardList, Settings, LogOut, User } from "lucide-react";
+import { LayoutDashboard, Briefcase, FileText, ClipboardList, Settings, LogOut, User, Bell } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -19,9 +19,10 @@ import { Separator } from "@/components/ui/separator";
 const navItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Jobs", url: "/jobs", icon: Briefcase },
-  { title: "Applications", url: "/applications", icon: ClipboardList },
+  { title: "Applied Jobs", url: "/applications", icon: ClipboardList },
   { title: "Resume", url: "/resume", icon: FileText },
-  { title: "Profile", url: "/settings", icon: User },
+  { title: "Profile", url: "/profile", icon: User },
+  { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {

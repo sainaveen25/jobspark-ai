@@ -91,30 +91,60 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          current_role: string | null
           experience_years: number | null
           full_name: string | null
+          github: string | null
           id: string
+          job_type: string | null
+          linkedin: string | null
+          location: string | null
+          phone: string | null
+          portfolio: string | null
+          preferred_locations: string[] | null
           preferred_roles: string[] | null
+          salary_max: number | null
+          salary_min: number | null
           updated_at: string
           user_id: string
           visa_status: string | null
         }
         Insert: {
           created_at?: string
+          current_role?: string | null
           experience_years?: number | null
           full_name?: string | null
+          github?: string | null
           id?: string
+          job_type?: string | null
+          linkedin?: string | null
+          location?: string | null
+          phone?: string | null
+          portfolio?: string | null
+          preferred_locations?: string[] | null
           preferred_roles?: string[] | null
+          salary_max?: number | null
+          salary_min?: number | null
           updated_at?: string
           user_id: string
           visa_status?: string | null
         }
         Update: {
           created_at?: string
+          current_role?: string | null
           experience_years?: number | null
           full_name?: string | null
+          github?: string | null
           id?: string
+          job_type?: string | null
+          linkedin?: string | null
+          location?: string | null
+          phone?: string | null
+          portfolio?: string | null
+          preferred_locations?: string[] | null
           preferred_roles?: string[] | null
+          salary_max?: number | null
+          salary_min?: number | null
           updated_at?: string
           user_id?: string
           visa_status?: string | null
