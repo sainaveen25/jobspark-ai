@@ -13,26 +13,15 @@ const nextConfig = {
     VITE_SUPABASE_URL: SUPABASE_URL,
     VITE_SUPABASE_PUBLISHABLE_KEY: SUPABASE_KEY,
   },
-  webpack(config, { isServer }) {
-    // The auto-generated Supabase client reads import.meta.env.VITE_*
-    // which doesn't exist in Next.js / webpack. Define it so the module
-    // resolves at build time (including during static prerendering).
-    const { webpack } = await import("next/dist/compiled/webpack/webpack.js")
-      .then((m) => m)
-      .catch(() => ({ webpack: null }));
-
+  webpack(config) {
+    // The auto-generated Supabase client uses import.meta.env.VITE_*
+    // which doesn't exist in webpack/Next.js. Replace at compile time.
     config.plugins.push(
-      new (config.plugins.find((p) => p.constructor.name === "DefinePlugin")
-        ?.constructor ??
-        class {
-          apply() {}
-        })({
+      new config.webpack.DefinePlugin({
         "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(SUPABASE_URL),
-        "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY":
-          JSON.stringify(SUPABASE_KEY),
+        "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(SUPABASE_KEY),
       })
     );
-
     return config;
   },
   experimental: {
