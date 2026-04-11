@@ -11,6 +11,7 @@ const SUPABASE_KEY =
   "";
 
 const nextConfig = {
+  distDir: "dist",
   env: {
     VITE_SUPABASE_URL: SUPABASE_URL,
     VITE_SUPABASE_PUBLISHABLE_KEY: SUPABASE_KEY,
