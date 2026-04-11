@@ -1,9 +1,7 @@
 "use client";
 
-import dynamic from "next/dynamic";
-
-export const runtime = "edge";
-
+// Prevent static prerendering — the Supabase client reads import.meta.env at module scope
+export const dynamic = "force-dynamic";
 
 import { FormEvent, useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
