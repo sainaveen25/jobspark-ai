@@ -1,3 +1,5 @@
+import webpack from "next/dist/compiled/webpack/webpack.js";
+
 /** @type {import('next').NextConfig} */
 
 const SUPABASE_URL =
@@ -14,10 +16,9 @@ const nextConfig = {
     VITE_SUPABASE_PUBLISHABLE_KEY: SUPABASE_KEY,
   },
   webpack(config) {
-    // The auto-generated Supabase client uses import.meta.env.VITE_*
-    // which doesn't exist in webpack/Next.js. Replace at compile time.
+    const { DefinePlugin } = webpack.webpack;
     config.plugins.push(
-      new config.webpack.DefinePlugin({
+      new DefinePlugin({
         "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(SUPABASE_URL),
         "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(SUPABASE_KEY),
       })
