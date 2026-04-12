@@ -11,6 +11,7 @@ export interface Database {
           id: string;
           user_id: string;
           full_name: string | null;
+          location: string | null;
           phone: string | null;
           linkedin: string | null;
           github: string | null;
@@ -19,7 +20,12 @@ export interface Database {
           experience_years: number | null;
           preferred_roles: string[] | null;
           preferred_locations: string[] | null;
+          salary_min: number | null;
+          salary_max: number | null;
+          job_type: string | null;
           visa_status: string | null;
+          work_auth: string | null;
+          profile_completion: number;
           created_at: string;
           updated_at: string;
         };
@@ -36,6 +42,7 @@ export interface Database {
           location: string | null;
           start_date: string;
           end_date: string | null;
+          description: string | null;
           bullet_points: Json;
           created_at: string;
           updated_at: string;
@@ -52,6 +59,7 @@ export interface Database {
           user_id: string;
           category: string;
           skill_name: string;
+          proficiency_level: string | null;
           created_at: string;
         };
         Insert: Omit<Database["public"]["Tables"]["skills"]["Row"], "id" | "created_at"> & { id?: string };
@@ -101,8 +109,13 @@ export interface Database {
           file_url: string | null;
           storage_path: string | null;
           parsed_text: string | null;
+          parsed_data: Json;
+          resume_score: number;
+          suggestions: Json;
           filename: string | null;
+          analyzed_at: string | null;
           created_at: string;
+          updated_at: string;
         };
         Insert: Omit<Database["public"]["Tables"]["resumes"]["Row"], "id" | "created_at"> & { id?: string };
         Update: Partial<Database["public"]["Tables"]["resumes"]["Row"]>;
@@ -119,6 +132,39 @@ export interface Database {
         };
         Insert: Omit<Database["public"]["Tables"]["resume_versions"]["Row"], "id" | "created_at"> & { id?: string };
         Update: Partial<Database["public"]["Tables"]["resume_versions"]["Row"]>;
+        Relationships: [];
+      };
+      job_preferences: {
+        Row: {
+          id: string;
+          user_id: string;
+          desired_role: string | null;
+          preferred_location: string | null;
+          salary_range: string | null;
+          job_type: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["job_preferences"]["Row"], "id" | "created_at" | "updated_at"> & {
+          id?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["job_preferences"]["Row"]>;
+        Relationships: [];
+      };
+      job_matches: {
+        Row: {
+          id: string;
+          user_id: string;
+          job_id: string;
+          match_score: number;
+          status: "saved" | "applied";
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["job_matches"]["Row"], "id" | "created_at" | "updated_at"> & {
+          id?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["job_matches"]["Row"]>;
         Relationships: [];
       };
     };

@@ -61,6 +61,9 @@ export const serverEnv = {
   get supabaseServiceRoleKey() {
     return readRequiredEnv("SUPABASE_SERVICE_ROLE_KEY");
   },
+  get jwtSecret() {
+    return readRequiredEnv("JWT_SECRET");
+  },
   get openAiApiKey() {
     return readRequiredEnv("OPENAI_API_KEY");
   },
@@ -94,6 +97,7 @@ export function getConfigHealth() {
   };
 
   const optional = {
+    JWT_SECRET: Boolean(readOptionalEnv("JWT_SECRET")),
     OPENAI_API_KEY: Boolean(readOptionalEnv("OPENAI_API_KEY")),
     APIFY_TOKEN: Boolean(readOptionalEnv("APIFY_TOKEN")),
     APIFY_GREENHOUSE_ACTOR_ID: Boolean(readOptionalEnv("APIFY_GREENHOUSE_ACTOR_ID")),
@@ -109,6 +113,10 @@ export function getConfigHealth() {
 
   if (!optional.APIFY_TOKEN) {
     warnings.push("APIFY_TOKEN is missing. Job sync is disabled until this is configured.");
+  }
+
+  if (!optional.JWT_SECRET) {
+    warnings.push("JWT_SECRET is missing. Bearer-token profile APIs are disabled until this is configured.");
   }
 
   if (
